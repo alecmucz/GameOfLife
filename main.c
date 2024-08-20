@@ -32,7 +32,7 @@ Grid InitializeGrid(int rows, int cols, float cellSize){
   return grid;
 }
 
-void RenderGrid(Grid grid, float cellSize, Camera2D camera) {
+void RenderGrid(Grid grid, float cellSize) {
    for(int i = 0; i < grid.rows; i++){
     for(int j = 0; j < grid.cols; j++){
       Vector2 worldPosition = (Vector2)grid.cells[i][j].position;
@@ -93,7 +93,7 @@ int main(void){
     BeginDrawing();
     ClearBackground(WHITE);
       BeginMode2D(camera);
-      RenderGrid(grid, 20.0f, camera);
+      RenderGrid(grid, 20.0f);
       EndMode2D();
     EndDrawing();
   }
