@@ -1,13 +1,15 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
 
 //Struct Definitions---------------------------------------------------
-struct Cell {
+typedef struct Cell {
   bool alive;
   Vector2 position;
-};
+} Cell;
 
 typedef struct Grid {
   int rows;
@@ -15,6 +17,33 @@ typedef struct Grid {
   struct Cell **cells;
 } Grid;
 //Functions------------------------------------------------------------
+Grid InitializeGrid(int rows, int cols, float cellSize){
+  Grid grid;
+  grid.rows = rows;
+  grid.cols = cols;
+  grid.cells = (Cell**)malloc(sizeof(Cell*) * rows);
+  for (int i = 0; i < rows; i++) {
+    grid.cells[i] = (Cell*)malloc(sizeof(Cell) * cols);
+    for (int j = 0; j < cols;j++) {
+      grid.cells[i][j].alive = false;
+      grid.cells[i][j].position = (Vector2){cellSize * i, cellSize * j};
+    }
+  }
+  return grid;
+}
+
+void RenderGrid(Grid grid, float cellSize, Camera2D camera) {
+   for(int i = 0; i < grid.rows; i++){
+    for(int j = 0; j < grid.cols; j++){
+      Vector2 worldPosition = (Vector2)grid.cells[i][j].position;
+      if (grid.cells[i][j].alive) {
+        DrawRectangle((int)worldPosition.x,(int)worldPosition.y,(int)cellSize,(int)cellSize,BLACK);
+      } else {
+        DrawRectangleLines((int)worldPosition.x,(int)worldPosition.y,(int)cellSize,(int)cellSize,GRAY);
+      }
+    }
+  } 
+}
 //---------------------------------------------------------------------
 // Program Main Entry Point
 //---------------------------------------------------------------------
@@ -22,6 +51,8 @@ int main(void){
   //Window and Camera Initializations
   const int windowWidth = 800;
   const int windowHeight = 600;
+
+  Grid grid = InitializeGrid(100, 100,20.0f);
 
   InitWindow(windowWidth,windowHeight,"Test");
 
@@ -39,6 +70,7 @@ int main(void){
   while (!WindowShouldClose()){
   // Movement----------------------------------------------------------
   if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
+      printf("Right Button Clicked");
       Vector2 delta = GetMouseDelta();
       delta = Vector2Scale(delta, -1.0f/camera.zoom);
       camera.target = Vector2Add(camera.target, delta);
@@ -56,13 +88,10 @@ int main(void){
     }
     // Render------------------------------------------------------------
     BeginDrawing();
-      ClearBackground(WHITE);
+    ClearBackground(WHITE);
       BeginMode2D(camera);
-        rlPushMatrix();
-          rlTranslatef(0,25*25,0);
-          rlRotatef(90,1,0,0);
-          DrawGrid(100, 50);
-        rlPopMatrix();
+      RenderGrid(grid, 20.0f, camera);
+      EndMode2D();
     EndDrawing();
   }
 
